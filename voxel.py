@@ -107,8 +107,8 @@ def getSixSquare(x, y, z, edge):
     return [front, back, left, right, down, up]
 
 
-your_mesh = mesh.Mesh.from_file('staffofmagnus-staffofmagnusstl-staffofmagnus-1.stl')
-edge = 10
+your_mesh = mesh.Mesh.from_file('tri_trax.stl')
+edge = 0.5
 triangles, XYZ_ALL = Get_triangles(your_mesh)
 # print(XYZ_ALL)
 XYZ_ALL_MIN, [range_x_all, range_y_all, range_z_all] = cut(XYZ_ALL, edge)
@@ -158,15 +158,16 @@ import matplotlib.pyplot as plt
 
 # print cube.sum()
 
-N = 10
+N = edge
 nx, ny, nz = cube.shape
 whole_cube = np.asarray([], dtype=mesh.Mesh.dtype)
 test1 = None
+sample1 = None
 for ix in range(nx):
     for iy in range(ny):
         for iz in range(nz):
             if cube[ix, iy, iz]:
-                data = np.zeros(6, dtype=mesh.Mesh.dtype)
+                data = np.zeros(12, dtype=mesh.Mesh.dtype)
                 # top
                 data['vectors'][0] = np.array([[ix, iy, iz + N],
                                                [ix + N, iy, iz + N],
@@ -174,35 +175,63 @@ for ix in range(nx):
                 data['vectors'][1] = np.array([[ix + N, iy + N, iz + N],
                                                [ix + N, iy, iz + N],
                                                [ix, iy + N, iz + N]])
-                # right
-                data['vectors'][2] = np.array([[ix + N, iy, iz],
-                                               [ix + N, iy, iz + N],
-                                               [ix + N, iy + N, iz + N]])
+                # bottom
+                data['vectors'][2] = np.array([[ix, iy, iz],
+                                               [ix + N, iy, iz],
+                                               [ix, iy + N, iz]])
                 data['vectors'][3] = np.array([[ix + N, iy + N, iz],
                                                [ix + N, iy, iz],
+                                               [ix, iy + N, iz]])
+
+                # right
+                data['vectors'][4] = np.array([[ix + N, iy, iz],
+                                               [ix + N, iy, iz + N],
                                                [ix + N, iy + N, iz + N]])
+                data['vectors'][5] = np.array([[ix + N, iy + N, iz],
+                                               [ix + N, iy, iz],
+                                               [ix + N, iy + N, iz + N]])
+
+                # right
+                data['vectors'][6] = np.array([[ix, iy, iz],
+                                               [ix, iy, iz + N],
+                                               [ix, iy + N, iz]])
+                data['vectors'][7] = np.array([[ix, iy, iz + N],
+                                               [ix, iy + N, iz + N],
+                                               [ix, iy + N, iz]])
+
                 # left
-                data['vectors'][4] = np.array([[ix, iy, iz],
+                data['vectors'][8] = np.array([[ix, iy, iz],
                                                [ix + N, iy, iz],
                                                [ix, iy, iz + N]])
-                data['vectors'][5] = np.array([[ix + N, iy, iz],
+                data['vectors'][9] = np.array([[ix + N, iy, iz],
                                                [ix, iy, iz + N],
                                                [ix + N, iy, iz + N]])
 
-                cube_back = mesh.Mesh(data.copy())
-                cube_front = mesh.Mesh(data.copy())
+                # left
+                data['vectors'][10] = np.array([[ix + N, iy + N, iz + N],
+                                               [ix + N, iy + N, iz],
+                                               [ix, iy + N, iz + N]])
+                data['vectors'][11] = np.array([[ix, iy + N, iz],
+                                               [ix + N, iy + N, iz],
+                                               [ix, iy + N, iz + N]])
+                
 
-                cube_back.rotate([5, 0.0, 0.0], math.radians(90))
-                cube_back.rotate([0.0, 5, 0.0], math.radians(90))
-                cube_back.rotate([5, 0.0, 0.0], math.radians(90))
+
+                cube_back = mesh.Mesh(data.copy())
+                # cube_front = mesh.Mesh(data.copy())
+
+                # cube_back.rotate([0.5, 0.0, 0.0], math.radians(90))
+                # cube_back.rotate([0.0, 0.5, 0.0], math.radians(90))
+                # cube_back.rotate([0.5, 0.0, 0.0], math.radians(90))
                 if test1 is None:
-                    print(ix, iy, iz)
+                    # print(ix, iy, iz)
+                    sample1 = cube_back
                     test1 = np.concatenate([cube_back.data.copy()
                                             # cube_front.data.copy(),
                                             ])
                 whole_cube = np.concatenate([whole_cube,
-                                             cube_back.data.copy(),
-                                             cube_front.data.copy(),
+                                             cube_back.data.copy()
+                                             # cube_front.data.copy(),
                                              ])
                 # x_s = np.linspace(, 2, N, dtype=np.float32)
                 # y_s = np.linspace(-2, 2, N, dtype=np.float32)
@@ -218,11 +247,14 @@ for ix in range(nx):
                 # plt.show()
 from matplotlib import pyplot as plt
 from mpl_toolkits import mplot3d
-final_cube = mesh.Mesh(test1)
+# final_cube = mesh.Mesh(test1)
+final_cube = mesh.Mesh(whole_cube)
 fig = plt.figure()
 axes = mplot3d.Axes3D(fig)
 
 axes.add_collection3d(mplot3d.art3d.Poly3DCollection(final_cube.vectors))
-
+# scale = sample1.points.flatten(-1)
+scale = final_cube.points.flatten(-1)
+axes.auto_scale_xyz(scale, scale, scale)
 # scale =
 plt.show()
