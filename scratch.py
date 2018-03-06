@@ -130,3 +130,7 @@ def main():
 
     # Show me some love ^^
     plt.show()
+
+
+if __name__ == '__main__':
+    main()
