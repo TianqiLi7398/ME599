@@ -89,8 +89,8 @@ def getInterLine(square, triangle):
     return [m[0], m[1], m[2], point]
 
 
-def getSixSquare(x, y, z, edge):
-    #     this function generates the function of six square surfaces of a cube, with it's min point
+def getSXSquare(x, y, z, edge):
+    #     this function generates the function of sX square surfaces of a cube, with it's min point
     #     at (x,y,z) and edge
     front = [(x, y, z), (x + edge, y, z), (x, y, z + edge), (x + edge, y, z + edge), (0, -1, 0)]
     back = [(x, y + edge, z), (x + edge, y + edge, z), (x, y + edge,
@@ -108,7 +108,7 @@ def getSixSquare(x, y, z, edge):
 
 
 your_mesh = mesh.Mesh.from_file('tri_trax.stl')
-edge = 0.5
+edge = 0.1
 triangles, XYZ_ALL = Get_triangles(your_mesh)
 # print(XYZ_ALL)
 XYZ_ALL_MIN, [range_x_all, range_y_all, range_z_all] = cut(XYZ_ALL, edge)
@@ -135,7 +135,7 @@ for triangle in triangles:
             for y in range(int(range_y) + 1):
                 for z in range(int(range_z) + 1):
                     # generate all surfaces of the cube
-                    Squares = getSixSquare(x * edge, y * edge, z * edge, edge)
+                    Squares = getSXSquare(x * edge, y * edge, z * edge, edge)
                     for square in Squares:
                         line_fun = getInterLine(square, triangle)
                         if line_fun == None:
@@ -144,11 +144,16 @@ for triangle in triangles:
                         vertical_line_triangle = []
                         for point_tr in triangle[0: -1]:
                             vertical_line_triangle.append(getVertical(line_fun, point_tr))
-                        if np.dot(vertical_line_triangle[0], vertical_line_triangle[1]) < 0 or np.dot(vertical_line_triangle[2], vertical_line_triangle[1]) < 0:
+                        if np.dot(vertical_line_triangle[0], vertical_line_triangle[1]) <= 0 or np.dot(vertical_line_triangle[2], vertical_line_triangle[1]) <= 0:
                             vertical_line_square = []
                             for point_sq in square[0: -1]:
                                 vertical_line_square.append(getVertical(line_fun, point_sq))
-                            if np.dot(vertical_line_square[0], vertical_line_square[1]) < 0 or np.dot(vertical_line_square[2], vertical_line_square[1]) < 0 or np.dot(vertical_line_square[3], vertical_line_square[2]) < 0 or np.dot(vertical_line_square[3], vertical_line_square[1]) < 0 or np.dot(vertical_line_square[0], vertical_line_square[3]) < 0 or np.dot(vertical_line_square[0], vertical_line_square[2]) < 0:
+                            if np.dot(vertical_line_square[0], vertical_line_square[1]) <= 0 or \
+                                    np.dot(vertical_line_square[2], vertical_line_square[1]) <= 0 or \
+                                    np.dot(vertical_line_square[3], vertical_line_square[2]) <= 0 or \
+                                    np.dot(vertical_line_square[3], vertical_line_square[1]) <= 0 or \
+                                    np.dot(vertical_line_square[0], vertical_line_square[3]) <= 0 or \
+                                    np.dot(vertical_line_square[0], vertical_line_square[2]) <= 0:
                                 cube[int(XYZ_MIN[0] - XYZ_ALL_MIN[0]) + x, int(XYZ_MIN[1] -
                                                                                XYZ_ALL_MIN[1]) + y, int(XYZ_MIN[2] - XYZ_ALL_MIN[2]) + z] = 1
 # print cube.sum()
@@ -167,55 +172,56 @@ for ix in range(nx):
     for iy in range(ny):
         for iz in range(nz):
             if cube[ix, iy, iz]:
+                X = N * ix
+                Y = N * iy
+                Z = N * iz
                 data = np.zeros(12, dtype=mesh.Mesh.dtype)
                 # top
-                data['vectors'][0] = np.array([[ix, iy, iz + N],
-                                               [ix + N, iy, iz + N],
-                                               [ix, iy + N, iz + N]])
-                data['vectors'][1] = np.array([[ix + N, iy + N, iz + N],
-                                               [ix + N, iy, iz + N],
-                                               [ix, iy + N, iz + N]])
+                data['vectors'][0] = np.array([[X, Y, Z + N],
+                                               [X + N, Y, Z + N],
+                                               [X, Y + N, Z + N]])
+                data['vectors'][1] = np.array([[X + N, Y + N, Z + N],
+                                               [X + N, Y, Z + N],
+                                               [X, Y + N, Z + N]])
                 # bottom
-                data['vectors'][2] = np.array([[ix, iy, iz],
-                                               [ix + N, iy, iz],
-                                               [ix, iy + N, iz]])
-                data['vectors'][3] = np.array([[ix + N, iy + N, iz],
-                                               [ix + N, iy, iz],
-                                               [ix, iy + N, iz]])
+                data['vectors'][2] = np.array([[X, Y, Z],
+                                               [X + N, Y, Z],
+                                               [X, Y + N, Z]])
+                data['vectors'][3] = np.array([[X + N, Y + N, Z],
+                                               [X + N, Y, Z],
+                                               [X, Y + N, Z]])
 
                 # right
-                data['vectors'][4] = np.array([[ix + N, iy, iz],
-                                               [ix + N, iy, iz + N],
-                                               [ix + N, iy + N, iz + N]])
-                data['vectors'][5] = np.array([[ix + N, iy + N, iz],
-                                               [ix + N, iy, iz],
-                                               [ix + N, iy + N, iz + N]])
+                data['vectors'][4] = np.array([[X + N, Y, Z],
+                                               [X + N, Y, Z + N],
+                                               [X + N, Y + N, Z + N]])
+                data['vectors'][5] = np.array([[X + N, Y + N, Z],
+                                               [X + N, Y, Z],
+                                               [X + N, Y + N, Z + N]])
 
                 # right
-                data['vectors'][6] = np.array([[ix, iy, iz],
-                                               [ix, iy, iz + N],
-                                               [ix, iy + N, iz]])
-                data['vectors'][7] = np.array([[ix, iy, iz + N],
-                                               [ix, iy + N, iz + N],
-                                               [ix, iy + N, iz]])
+                data['vectors'][6] = np.array([[X, Y, Z],
+                                               [X, Y, Z + N],
+                                               [X, Y + N, Z]])
+                data['vectors'][7] = np.array([[X, Y, Z + N],
+                                               [X, Y + N, Z + N],
+                                               [X, Y + N, Z]])
 
                 # left
-                data['vectors'][8] = np.array([[ix, iy, iz],
-                                               [ix + N, iy, iz],
-                                               [ix, iy, iz + N]])
-                data['vectors'][9] = np.array([[ix + N, iy, iz],
-                                               [ix, iy, iz + N],
-                                               [ix + N, iy, iz + N]])
+                data['vectors'][8] = np.array([[X, Y, Z],
+                                               [X + N, Y, Z],
+                                               [X, Y, Z + N]])
+                data['vectors'][9] = np.array([[X + N, Y, Z],
+                                               [X, Y, Z + N],
+                                               [X + N, Y, Z + N]])
 
                 # left
-                data['vectors'][10] = np.array([[ix + N, iy + N, iz + N],
-                                               [ix + N, iy + N, iz],
-                                               [ix, iy + N, iz + N]])
-                data['vectors'][11] = np.array([[ix, iy + N, iz],
-                                               [ix + N, iy + N, iz],
-                                               [ix, iy + N, iz + N]])
-                
-
+                data['vectors'][10] = np.array([[X + N, Y + N, Z + N],
+                                                [X + N, Y + N, Z],
+                                                [X, Y + N, Z + N]])
+                data['vectors'][11] = np.array([[X, Y + N, Z],
+                                                [X + N, Y + N, Z],
+                                                [X, Y + N, Z + N]])
 
                 cube_back = mesh.Mesh(data.copy())
                 # cube_front = mesh.Mesh(data.copy())
@@ -224,7 +230,7 @@ for ix in range(nx):
                 # cube_back.rotate([0.0, 0.5, 0.0], math.radians(90))
                 # cube_back.rotate([0.5, 0.0, 0.0], math.radians(90))
                 if test1 is None:
-                    # print(ix, iy, iz)
+                    # print(X, Y, Z)
                     sample1 = cube_back
                     test1 = np.concatenate([cube_back.data.copy()
                                             # cube_front.data.copy(),
