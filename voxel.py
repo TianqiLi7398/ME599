@@ -86,7 +86,7 @@ def getInterLine(square, triangle):
         if n1[2] != 0.0:
             point = [1, d2, (d1 - n1[1] * d2 - n1[0]) / n1[2]]
         else:
-            point = [(d1 - n1[1]*d2)/n1[0], d2, 0]
+            point = [(d1 - n1[1] * d2) / n1[0], d2, 0]
     elif dimension == 2:
         if n1[1] != 0:
             point = [1, (d1 - n1[2] * d2 - n1[0]) / n1[1], d2]
@@ -116,7 +116,7 @@ def getSXSquare(x, y, z, edge):
     return [front, back, left, right, down, up]
 
 
-your_mesh = mesh.Mesh.from_file('C:\Users\jbaldassini\Desktop\ME599-master\models\\sphere.stl')
+your_mesh = mesh.Mesh.from_file('models/sphere.stl')
 edge = 0.1
 triangles, XYZ_ALL = Get_triangles(your_mesh)
 # print(XYZ_ALL)
@@ -169,8 +169,6 @@ for triangle in triangles:
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
-
-# print cube.sum()
 
 N = edge
 nx, ny, nz = cube.shape
