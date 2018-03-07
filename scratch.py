@@ -1,9 +1,11 @@
 # Create cardioid function
 import math
+from numba import cuda
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 import numpy as np
 from skimage import measure
+import plotUtils
 
 TPBX = 8
 TPBY = 8
@@ -18,12 +20,10 @@ def f_heart_kernel(d_f, d_x, d_y, d_z):
     i, j, k = cuda.grid(3)
     nx, ny, nz = d_f.shape
     if i < nx and j < ny and k < nz:
-        d_f[i,j,k] = f_heart(d_x[i], d_y[j], d_z[k])
+        d_f[i,j,k] = f_heart(d_x[i,j,k], d_y[i,j,k], d_z[i,j,k])
 
 def f_heart3D(X, Y, Z):
-    nx = X.size
-    ny = Y.size
-    nz = Z.size
+    nx, ny, nz = X.shape
 
     d_x = cuda.to_device(X)
     d_y = cuda.to_device(Y)
@@ -48,12 +48,10 @@ def f_sphere_kernel(d_f, d_x, d_y, d_z, R):
     i, j, k = cuda.grid(3)
     nx, ny, nz = d_f.shape
     if i < nx and j < ny and k < nz:
-        d_f[i,j,k] = f_heart(d_x[i], d_y[j], d_z[k], R)
+        d_f[i,j,k] = f_sphere(d_x[i,j,k], d_y[i,j,k], d_z[i,j,k], R)
 
 def f_sphere3D(X, Y, Z, R):
-    nx = X.size
-    ny = Y.size
-    nz = Z.size
+    nx, ny, nz = X.shape
 
     d_x = cuda.to_device(X)
     d_y = cuda.to_device(Y)
@@ -96,21 +94,48 @@ def morph3D(shape_start, shape_end, t):
                 (nz + TPBZ - 1) // TPBZ
                 )
     blockDims = (TPBX, TPBY, TPBZ)
-    f_sphere_kernel[gridDims, blockDims](d_f, d_x, d_y, t)
+    morph_kernel[gridDims, blockDims](d_f, d_x, d_y, t)
     return d_f.copy_to_host()
 
+
+
+def exportPLY(filename, verts2, faces):
+    plyf = open(filename +'.ply', 'w')
+    plyf.write( "ply\n")
+    plyf.write( "format ascii 1.0\n")
+    plyf.write( "comment ism.py generated\n")
+    plyf.write( "element vertex " + str(verts2.size//3)+'\n')
+    plyf.write( "property float x\n")
+    plyf.write( "property float y\n")
+    plyf.write( "property float z\n")
+    plyf.write( "element face " + str(faces.size//3)+'\n')
+    plyf.write( "property list uchar int vertex_indices\n")
+    plyf.write( "end_header\n")
+    for i in range(0,verts2.size//3):
+        plyf.write(str(verts2[i][0])+' '+str(verts2[i][1])+' '+str(verts2[i][2])+'\n')
+
+    for i in range(0,faces.size//3):
+        plyf.write('3 '+str(faces[i][0])+' '+str(faces[i][1])+' '+str(faces[i][2])+'\n') 
+    plyf.close()
+    # end of PLY file write
+    
 def main():
     # Set up mesh
     n = 100 
     R = 3.0
-    x = np.linspace(-3,3,n)
-    y = np.linspace(-3,3,n)
-    z = np.linspace(-3,3,n)
+    m = 3.0
+    dx = 2 * m / (n - 1)
+    dy = 2 * m / (n - 1)
+    dz = 2 * m / (n - 1)
+    x = np.linspace(-m,m,n)
+    y = np.linspace(-m,m,n)
+    z = np.linspace(-m,m,n)
     X, Y, Z =  np.meshgrid(x, y, z)
     heart = f_heart3D(X,Y,Z)
     sphere = f_sphere3D(X,Y,Z,R)
 
     surf = morph3D(sphere, heart, 0.90)
+    
     # Extract a 2D surface mesh from a 3D volume (F=0)
     verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
 
@@ -130,7 +155,13 @@ def main():
 
     # Show me some love ^^
     plt.show()
-
+    '''
+    plotUtils.arraycontourplot3d(surf, x, y, z, dx, dy, dz, vars=['x', 'y', 'z'], titlestring="morph3D", filename="morph3D")
+    '''
+    filename = 'shit'
+    
+    print('Object exported to '+filename+'.ply')
+    exportPLY(filename, verts, faces)
 
 if __name__ == '__main__':
     main()
