@@ -47,6 +47,41 @@ def f_cross(x, y):
                     F[ix, iy] = 40.0
     return F
 
+def f_cross_(x, y):
+
+    # F = np.zeros((n,n), dtype=np.float32)
+
+    if (abs(abs(x) - 40.0) < 1e-16):
+        if (abs(y) <= 9.0):
+            F = 0.0
+        else:
+            F = 40.0
+
+    elif (9.0 < abs(x) < 40.0):
+        if (abs(9.0 - abs(y)) < 1e-16):
+            F = 0.0
+        else:
+            F = 40.0
+
+    elif (abs(abs(x) - 9.0) < 1e-16):
+        if (9.0 <= abs(y) <= 40.0):
+            F = 0.0
+        else:
+            F = 40.0
+
+    elif (abs(x) < 9.0):
+        if (abs(abs(y) - 40.0) < 1e-16):
+            F = 0.0
+        else:
+            F = 40.0
+    return F
+
+def circle(x,y, R):
+    return x**2 - y**2 - R**2
+
+def compose(x,y,z):
+    return 0.1*z*circle(x,y, 20) + 0.1*(10 - z)*f_cross_(x,y)
+
 def arraycontourplot(fvals, xvals, yvals, levels=[-1000,0], vars=['x','y'],
     titlestring='', filled=False):
     fig = plt.figure()
@@ -91,49 +126,30 @@ def morph(shape_start, shape_end, t, final_shape):
 
 def main():
 # Set up mesh
-    n = 801
-    m = 40
+    m = 40  # min and max coordinate values
+    num = 1000  # number of points along each axis
+    # Map onto a 2D grid
+    xvals = np.linspace(-m, m, num)
+    yvals = np.linspace(-m, m, num)
+    zvals = np.linspace(-m, m, num)
 
-    x = np.linspace(-m,m,n)
-    y = np.linspace(m,-m,n)
-    X, Y=  np.meshgrid(x, y)
-    cross = f_cross(X, Y)
-    # arraycontourplot(cross, x, y, levels=[-1,1])
-
-    R = 40.0
-    x_cycle = np.linspace(-m,m,n)
-    y_cycle = np.linspace(m,-m,n)
-    X_cycle, Y_cycle = np.meshgrid(x_cycle, y_cycle)
-    cycle = f_cycle(X_cycle, Y_cycle, R)
-    print("1")
-    # square = f_square(X, Y, R)
-    # arraycontourplot(square, x, y, levels=[0])
-    t = np.linspace(0,10,100)
-    morph_shape = np.zeros((n,n,100), dtype=np.float32)
-    morph_shape = morph(cross, cycle, t, morph_shape)
-    print("2")
-    surf = morph_shape
-
-    # Extract a 2D surface mesh from a 3D volume (F=0)
-    verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
+    f4 = np.zeros([num, num, num])
 
 
-    # Create a 3D figure
-    fig = plt.figure(figsize=(12,8))
-    ax = fig.add_subplot(111, projection='3d')
+    for k in range(num):
+        for j in range(num):
+            for i in range(num):
+                f4[k, j, i] = compose(xvals[i], yvals[j], zvals[k])
+    # create contourplot based on 3d array
+    # include option arg filename='fname' to export in PLY format
+    dx = 2 * m / (num - 1)
+    dy = 2 * m / (num - 1)
+    dz = 2 * m / (num - 1)
+    arraycontourplot3d(f4, xvals, yvals, zvals, dx, dy, dz, levels=[-1000, 0],
+                       titlestring='Testing arraycontourplot3d', filename='box_elp')
 
-    # Plot the surface
-    ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2],
-                    cmap='Spectral', lw=1)
 
-    # Change the angle of view and title
-    ax.view_init(15, -15)
 
-    # ax.set_title(u"Made with ❤ (and Python)", fontsize=15) # if you have Python 3
-    ax.set_title("Made with <3 (and Python)", fontsize=15)
-
-    # Show me some love ^^
-    plt.show()
 
 if __name__ == '__main__':
     main()
