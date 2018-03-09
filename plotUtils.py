@@ -1,5 +1,9 @@
 '''
-utilies for creating 2d and 3d plots based on 2d and 3d numpy arrays
+March 8, 2018
+Project of Voxel Model ME 599
+Tianqi Li, Junlin Li
+
+This file includes all the function of creating .ply file
 '''
 import numpy as np
 import matplotlib.pyplot as plt

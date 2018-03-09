@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from skimage import measure
 from numba import cuda
+from plotUtils import *
 
 TPBX = 8
 TPBY = 8
@@ -57,25 +58,25 @@ def cross_kernel(d_f, d_x, d_y):
                 else:
                     d_f[i,j] = 40.0
 
-            elif (9.0 < abs(d_x[i,j]) < 40.0):
-                if (abs(9.0 - abs(d_y[i,j])) < 1e-16):
-                    d_f[i,j] = 0.0
-                else:
-                    d_f[i,j] = 40.0
-
-            elif (abs(abs(d_x[i,j]) - 9.0) < 1e-16):
-                if (9.0 <= abs(d_y[i,j]) <= 40.0):
-                    d_f[i,j] = 0.0
-                else:
-                    d_f[i,j] = 40.0
-
-            elif (abs(d_x[i,j]) < 9.0):
-                if (abs(abs(d_y[i,j]) - 40.0) < 1e-16):
-                    d_f[i,j] = 0.0
-                else:
-                    d_f[i,j] = 40.0
+        elif (9.0 < abs(d_x[i,j]) < 40.0):
+            if (abs(9.0 - abs(d_y[i,j])) < 1e-16):
+                d_f[i,j] = 0.0
             else:
                 d_f[i,j] = 40.0
+
+        elif (abs(abs(d_x[i,j]) - 9.0) < 1e-16):
+            if (9.0 <= abs(d_y[i,j]) <= 40.0):
+                d_f[i,j] = 0.0
+            else:
+                d_f[i,j] = 40.0
+
+        elif (abs(d_x[i,j]) < 9.0):
+            if (abs(abs(d_y[i,j]) - 40.0) < 1e-16):
+                d_f[i,j] = 0.0
+            else:
+                d_f[i,j] = 40.0
+        else:
+            d_f[i,j] = 40.0
 
 def f_cross_p(X, Y):
     nx, ny= X.shape
@@ -151,7 +152,7 @@ def morph(shape_start, shape_end, t, final_shape):
 
 @cuda.jit(device=True)
 def morph_f(x,y,t):
-    return x * (1 - t) + y * t
+    return x * (1 - t * 0.1) + y * t * 0.1
 
 @cuda.jit
 def morph_kernel(d_f, d_x, d_y, T):
@@ -178,43 +179,89 @@ def f_morph_p(X, Y, T):
 def main():
 # Set up mesh
     n = 821
-    m = 41
+    m = 41 # min and max coordinate values
+    num = 821# number of points along each axis
 
     x = np.linspace(-m,m,n)
     y = np.linspace(m,-m,n)
     X, Y=  np.meshgrid(x, y)
     cross = f_cross_p(X, Y)
+    print("1")
     # arraycontourplot(cross, x, y, levels=[-1,1])
     R = 41.0
     x_cycle = np.linspace(-m,m,n)
     y_cycle = np.linspace(m,-m,n)
     X_cycle, Y_cycle = np.meshgrid(x_cycle, y_cycle)
     cycle = f_cycle_p(X_cycle, Y_cycle, R)
-    nt = 100
+    print("2")
+    nt = 101
     t = np.linspace(0,10,nt)
     morph_shape = f_morph_p(cross, cycle, t)
+    print("3")
     surf = morph_shape
 
     # Extract a 2D surface mesh from a 3D volume (F=0)
     verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
 
+    # convert to .ply
 
-    # Create a 3D figure
-    fig = plt.figure(figsize=(12,8))
-    ax = fig.add_subplot(111, projection='3d')
+    print ('verts, faces = ' + str(verts.size // 3) + ', ' + str(faces.size // 3))
 
-    # Plot the surface
-    ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2],
-                    cmap='Spectral', lw=1)
+    ndex = [0, 0, 0]
+    frac = [0, 0, 0]
+    verts2 = np.ndarray(shape=(verts.size // 3, 3), dtype=float)
 
-    # Change the angle of view and title
-    ax.view_init(15, -15)
+    xvals, yvals = x, y
+    zvals = t
 
-    # ax.set_title(u"Made with ❤ (and Python)", fontsize=15) # if you have Python 3
-    ax.set_title("Made with <3 (and Python)", fontsize=15)
+    dx = 2 * m / (num - 1)
+    dy = 2 * m / (num - 1)
+    dz = 2 * 10 / (nt - 1)
 
-    # Show me some love ^^
-    plt.show()
+    for i in range(0, verts.size // 3):
+        for j in range(0, 3):
+            ndex[j] = int(verts[i][j])
+            frac[j] = verts[i][j] % 1
+        # not index trickiness below (with 0,1,2 reversed on right-hand side)
+        verts2[i][0] = xvals[ndex[2]] + (dx) * frac[2]
+        verts2[i][1] = yvals[ndex[1]] + (dy) * frac[1]
+        verts2[i][2] = zvals[ndex[0]] + (dz) * frac[0]
+
+    # mesh = Poly3DCollection(verts[faces], linewidths=0.1, alpha=0.85)
+    # mesh.set_edgecolor([0, 0, 1])
+    # mesh.set_facecolor([0, 1, 0])
+    # ax.add_collection3d(mesh)
+    # ax.set_title(titlestring)
+    # ax.set_xlabel(vars[0])
+    # ax.set_ylabel(vars[1])
+    # ax.set_zlabel(vars[2])
+    # ax.set_xlim(min(xvals), max(xvals))
+    # ax.set_ylim(min(yvals), max(yvals))
+    # ax.set_zlim(min(zvals), max(zvals))
+    # plt.show()
+
+    filename = 'ljlshit'
+    if filename != '':
+        print('Object exported to ' + filename + '.ply')
+        exportPLY(filename, verts2, faces)
+    #
+    #
+    # # Create a 3D figure
+    # fig = plt.figure(figsize=(12,8))
+    # ax = fig.add_subplot(111, projection='3d')
+    #
+    # # Plot the surface
+    # ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2],
+    #                 cmap='Spectral', lw=1)
+    #
+    # # Change the angle of view and title
+    # ax.view_init(15, -15)
+    #
+    # # ax.set_title(u"Made with ❤ (and Python)", fontsize=15) # if you have Python 3
+    # ax.set_title("Made with <3 (and Python)", fontsize=15)
+    #
+    # # Show me some love ^^
+    # plt.show()
 
 if __name__ == '__main__':
     main()
