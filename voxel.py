@@ -107,7 +107,7 @@ def getSixSquare(x, y, z, edge):
     return [front, back, left, right, down, up]
 
 
-your_mesh = mesh.Mesh.from_file('tri_trax.stl')
+your_mesh = mesh.Mesh.from_file('C:\Users\jbaldassini\Desktop\ME599\models\\tri_trax.stl')
 edge = 0.5
 triangles, XYZ_ALL = Get_triangles(your_mesh)
 # print(XYZ_ALL)
@@ -214,7 +214,7 @@ for ix in range(nx):
                 data['vectors'][11] = np.array([[ix, iy + N, iz],
                                                [ix + N, iy + N, iz],
                                                [ix, iy + N, iz + N]])
-                
+
 
 
                 cube_back = mesh.Mesh(data.copy())
