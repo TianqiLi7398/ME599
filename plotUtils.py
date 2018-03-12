@@ -76,11 +76,11 @@ def exportPLY(filename, verts2, faces):
     plyf.write("ply\n")
     plyf.write("format ascii 1.0\n")
     plyf.write("comment ism.py generated\n")
-    plyf.write("element vertex " + str(verts2.size / 3) + '\n')
+    plyf.write("element vertex " + str(int(verts2.size // 3)) + '\n')
     plyf.write("property float x\n")
     plyf.write("property float y\n")
     plyf.write("property float z\n")
-    plyf.write("element face " + str(faces.size / 3) + '\n')
+    plyf.write("element face " + str(int(faces.size // 3)) + '\n')
     plyf.write("property list uchar int vertex_indices\n")
     plyf.write("end_header\n")
     for i in range(0, verts2.size // 3):

@@ -72,9 +72,11 @@ def superellipsoid(x, y, z):
 def rate(z, h):
     return z / h
 
+@cuda.jit(device=True)
 def ellipse_x(x, y):
     return (x ** 2 + y ** 2 / 0.25 - 1)
 
+@cuda.jit(device=True)
 def ellipse_y(x, y):
     return (x ** 2 / 0.25 + y ** 2 - 1)
 
@@ -94,7 +96,7 @@ def compose_par(x, y, t):
     # This function concrete f1 and f2 in z dimension, with rate(z,h) as the parameter
     # w in [0, 1]
     # F = w*f1 + (1-w)*f2
-    if t >= 0 and z <= 1:
+    if t >= 0 and t <= 1:
         return (1 - t) * ellipse_x(x, y) + t * ellipse_y(x, y)
     else:
         return 100
@@ -111,7 +113,7 @@ def parallel_compose(x, y, t):
     nx, ny, nt= x.shape[0], y.shape[0], t.shape[0]
     d_x = cuda.to_device(x)
     d_y = cuda.to_device(y)
-    d_t = cuda.to_device(z)
+    d_t = cuda.to_device(t)
     d_f = cuda.device_array((nx,ny,nt), dtype=np.float32)
 
     gridDims = ((nx + TPBX - 1) // TPBX,
@@ -138,7 +140,7 @@ def main():
     # Set up mesh
 
     m = 1  # min and max coordinate values
-    num = 2001  # number of points along each axis
+    num = 501  # number of points along each axis
 
     # Map onto a 3D grid
     xvals = np.linspace(-m, m, num)
