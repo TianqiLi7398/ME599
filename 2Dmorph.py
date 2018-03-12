@@ -152,7 +152,10 @@ def morph(shape_start, shape_end, t, final_shape):
 
 @cuda.jit(device=True)
 def morph_f(x,y,t):
-    return x * (1 - t * 0.1) + y * t * 0.1
+    # return x * (1 - t * 0.1) + y * t * 0.1
+    rst = (x ** 2 + y ** 2 / 0.25- 1) * (1-t) + \
+            t * (x ** 2 / 0.25 + y ** 2 - 1)
+    return rst
 
 @cuda.jit
 def morph_kernel(d_f, d_x, d_y, T):
@@ -178,6 +181,21 @@ def f_morph_p(X, Y, T):
 
 def main():
 # Set up mesh
+
+# 2D parabolid morph
+    n = 2001
+    m = 1 # min and max coordinate values
+    num = 2001# number of points along each axis
+
+    x = np.linspace(-m,m,n)
+    y = np.linspace(m,-m,n)
+    X, Y=  np.meshgrid(x, y)
+    nt = 2001
+    t = np.linspace(0,1,nt)
+    morph_shape = f_morph_p(x, y, t)
+    print("3")
+    surf = morph_shape
+    '''
     n = 821
     m = 41 # min and max coordinate values
     num = 821# number of points along each axis
@@ -195,10 +213,11 @@ def main():
     cycle = f_cycle_p(X_cycle, Y_cycle, R)
     print("2")
     nt = 101
-    t = np.linspace(0,10,nt)
+    t = np.linspace(0,1,nt)
     morph_shape = f_morph_p(cross, cycle, t)
     print("3")
     surf = morph_shape
+    '''
 
     # Extract a 2D surface mesh from a 3D volume (F=0)
     verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
