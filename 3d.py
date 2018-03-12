@@ -23,32 +23,32 @@ TPBY = 8
 TPBZ = 8
 
 def superellipse(x, y, n):
-    return x**n + y**n - 1
+    return x ** n + y ** n - 1
 
 
 def superellipsoid(x, y, z, n):
-    return x**n + y**n + z**n - 3
+    return x ** n + y ** n + z ** n - 3
 
 
 def heart(x, y, z):
-    return 320 * ((-x**2 * z**3 - 9 * y**2 * z**3 / 80) +
-                  (x**2 + 9 * y**2 / 4 + z**2 - 1)**3)
+    return 320 * ((- x ** 2 * z ** 3 - 9 * y ** 2 * z ** 3 / 80) +
+                  (x ** 2 + 9 * y ** 2 / 4 + z ** 2 - 1) ** 3)
 
 
 def paraboloid_elip(x, y, z):
-    return z**2 / (0.5 ** 2) + x**2 / 1 + y**2 / (0.5 ** 2) -1
+    return z ** 2 / (0.5 ** 2) + x ** 2 / 1 + y ** 2 / (0.5 ** 2) -1
 
 
 def Hyperboloid(x, y, z):
-    return z - x**2 / 1 + y ** 2 / 2
+    return z - x ** 2 / 1 + y ** 2 / 2
 
 
 def box(x, y, z):
-    return x**10 + y ** 10 + z**10 - 1
+    return x ** 10 + y ** 10 + z ** 10 - 1
 
 
 def first(x, y, z):
-    return x**3 + y**2 - z**2
+    return x ** 3 + y ** 2 - z ** 2
 
 
 def gravity(x, y, z):
@@ -56,11 +56,11 @@ def gravity(x, y, z):
     M = 1989100e24
     m = 5.9736e24
     Ear = 92.96  # unit million miles
-    sun = -G * M * m / np.sqrt(x**2 + y**2 + z**2)
-    earth = - G * M * m / np.sqrt((x - 92.96)**2 + y**2 + z**2)
+    sun = -G * M * m / np.sqrt(x ** 2 + y ** 2 + z ** 2)
+    earth = - G * M * m / np.sqrt((x - 92.96) ** 2 + y ** 2 + z ** 2)
 
-    c = -G * M * m / np.sqrt(50**2 + 0**2 + 0**2) - G * M * m / \
-        np.sqrt((50 - 92.96)**2 + 0**2 + 0**2)
+    c = -G * M * m / np.sqrt(50 ** 2 + 0 ** 2 + 0 ** 2) - G * M * m / \
+        np.sqrt((50 - 92.96) **2 + 0 **2 + 0 ** 2)
     return sun + earth - c
 
 
@@ -81,7 +81,7 @@ def compose_ser(x, y, z, tvals):
 
 # parallel cube
 @cuda.jit(device=True)
-def f_cube(x,y,z,L):
+def f_cube(x, y, z, L):
     return x ** 10 + y ** 10 + z ** 10 - L
 
 @cuda.jit
@@ -109,9 +109,8 @@ def f_cube3D(X, Y, Z, L):
 
 # parallel ellipsoid
 @cuda.jit(device=True)
-def f_ellipsoid(x,y,z,L):
-    # return 1 * (x**2 + y**2 + z**2 - R**2)
-    return z**2 / (0.5 ** 2) + x**2 / 1 + y**2 / (0.5 ** 2) - L
+def f_ellipsoid(x, y, z, L):
+    return z ** 2 / (0.5 ** 2) + x**2 / 1 + y**2 / (0.5 ** 2) - L
 
 @cuda.jit
 def f_ellipsoid_kernel(d_f, d_x, d_y, d_z, R):
@@ -126,7 +125,7 @@ def f_ellipsoid3D(X, Y, Z, R):
     d_x = cuda.to_device(X)
     d_y = cuda.to_device(Y)
     d_z = cuda.to_device(Z)
-    d_f = cuda.device_array((nx,ny,nz), dtype=np.float32)
+    d_f = cuda.device_array((nx, ny, nz), dtype=np.float32)
 
     gridDims = ((nx + TPBX - 1) // TPBX,
                 (ny + TPBY - 1) // TPBY,
@@ -142,7 +141,8 @@ def morph_kernel(d_f, d_x, d_y, d_z, t, C):
     i, j, k = cuda.grid(3)
     nx, ny, nz = d_f.shape
     if i < nx and j < ny and k < nz:
-        d_f[i,j,k] = f_cube(d_x[i,j,k], d_y[i,j,k], d_z[i,j,k], C) * (t) + (1-t) * f_ellipsoid(d_x[i,j,k], d_y[i,j,k], d_z[i,j,k], C)
+        d_f[i,j,k] = f_cube(d_x[i, j, k], d_y[i, j, k], d_z[i, j, k], C) * (t) + \
+                     (1-t) * f_ellipsoid(d_x[i, j, k], d_y[i, j, k], d_z[i, j, k], C)
 
 def morph3D(x, y, z, t, C):
     nx, ny, nz = x.shape
@@ -150,7 +150,7 @@ def morph3D(x, y, z, t, C):
     d_x = cuda.to_device(x)
     d_y = cuda.to_device(y)
     d_z = cuda.to_device(z)
-    d_f = cuda.device_array((nx,ny,nz), dtype=np.float32)
+    d_f = cuda.device_array((nx, ny, nz), dtype=np.float32)
 
     gridDims = ((nx + TPBX - 1) // TPBX,
                 (ny + TPBY - 1) // TPBY,
@@ -167,7 +167,7 @@ def main():
     xvals = np.linspace(-m, m, num)
     yvals = np.linspace(-m, m, num)
     zvals = np.linspace(-m, m, num)
-    tvals = np.linspace(0,1,11)
+    tvals = np.linspace(0, 1, 11)
     X, Y, Z =  np.meshgrid(xvals, yvals, zvals)
 
     # F_ser = compose_ser(xvals, yvals, zvals, tvals)
