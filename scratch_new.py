@@ -158,6 +158,15 @@ def morph3D(shape_start, shape_end, t):
 
 def main():
     # Set up mesh
+    def plot_3D(X, Y, Z):
+        n = len(X)
+        rst = np.zeros((n,n,n), dtype=np.float32)
+        for ix in range(n):
+            for iy in range(n):
+                for iz in range(n):
+                    rst[ix,iy,iz] = Z[ix,iy,iz]**2 / (0.5 ** 2) + X[ix,iy,iz]**2 / 1 + Y[ix,iy,iz]**2 / (0.5 ** 2) -1
+        return rst
+
     n = 100
     R = 3.0
     m = 10
@@ -171,29 +180,30 @@ def main():
     X, Y, Z =  np.meshgrid(x, y, z)
     # heart = f_heart3D(X,Y,Z)
     # sphere = f_sphere3D(X,Y,Z,R)
-    for it in t:
-        surf = morph3D(X, Y, Z, it, R)
-        i = it*10
+    # for it in t:
+    #     surf = morph3D(X, Y, Z, it, R)
+    #     i = it*10
     # Extract a 2D surface mesh from a 3D volume (F=0)
-    # verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
-        plotUtils.arraycontourplot3d(surf, x, y, z, dx, dy, dz, vars=['x','y','z'], titlestring='morph3D', filename='morph3D%d' % i)
+    surf = plot_3D(X,Y,Z)
+    verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
+    # plotUtils.arraycontourplot3d(surf, x, y, z, dx, dy, dz, vars=['x','y','z'], titlestring='morph3D', filename='morph3D%d' % i)
 
     # Create a 3D figure
-    # fig = plt.figure(figsize=(12,8))
-    # ax = fig.add_subplot(111, projection='3d')
+    fig = plt.figure(figsize=(12,8))
+    ax = fig.add_subplot(111, projection='3d')
 
-    # # Plot the surface
-    # ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2],
-    #                 cmap='Spectral', lw=1)
+    # Plot the surface
+    ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2],
+                    cmap='Spectral', lw=1)
 
-    # # Change the angle of view and title
-    # ax.view_init(15, -15)
+    # Change the angle of view and title
+    ax.view_init(15, -15)
 
-    # # ax.set_title(u"Made with ❤ (and Python)", fontsize=15) # if you have Python 3
-    # ax.set_title("Made with <3 (and Python)", fontsize=15)
+    # ax.set_title(u"Made with ❤ (and Python)", fontsize=15) # if you have Python 3
+    ax.set_title("Made with <3 (and Python)", fontsize=15)
 
-    # # Show me some love ^^
-    # plt.show()
+    # Show me some love ^^
+    plt.show()
 
 
 if __name__ == '__main__':

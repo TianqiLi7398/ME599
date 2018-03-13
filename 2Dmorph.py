@@ -193,8 +193,9 @@ def main():
     nt = 2001
     t = np.linspace(0,1,nt)
     morph_shape = f_morph_p(x, y, t)
-    print("3")
+    # print("3")
     surf = morph_shape
+    arraycontourplot(surf, x, y, levels=[-1,1])
     '''
     n = 821
     m = 41 # min and max coordinate values
@@ -220,31 +221,31 @@ def main():
     '''
 
     # Extract a 2D surface mesh from a 3D volume (F=0)
-    verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
+    # verts, faces = measure.marching_cubes_classic(surf, 0.0, spacing=(0.1, 0.1, 0.1))
 
-    # convert to .ply
+    # # convert to .ply
 
-    print ('verts, faces = ' + str(verts.size // 3) + ', ' + str(faces.size // 3))
+    # print ('verts, faces = ' + str(verts.size // 3) + ', ' + str(faces.size // 3))
 
-    ndex = [0, 0, 0]
-    frac = [0, 0, 0]
-    verts2 = np.ndarray(shape=(verts.size // 3, 3), dtype=float)
+    # ndex = [0, 0, 0]
+    # frac = [0, 0, 0]
+    # verts2 = np.ndarray(shape=(verts.size // 3, 3), dtype=float)
 
-    xvals, yvals = x, y
-    zvals = t
+    # xvals, yvals = x, y
+    # zvals = t
 
-    dx = 2 * m / (num - 1)
-    dy = 2 * m / (num - 1)
-    dz = 2 * 10 / (nt - 1)
+    # dx = 2 * m / (num - 1)
+    # dy = 2 * m / (num - 1)
+    # dz = 2 * 10 / (nt - 1)
 
-    for i in range(0, verts.size // 3):
-        for j in range(0, 3):
-            ndex[j] = int(verts[i][j])
-            frac[j] = verts[i][j] % 1
-        # not index trickiness below (with 0,1,2 reversed on right-hand side)
-        verts2[i][0] = xvals[ndex[2]] + (dx) * frac[2]
-        verts2[i][1] = yvals[ndex[1]] + (dy) * frac[1]
-        verts2[i][2] = zvals[ndex[0]] + (dz) * frac[0]
+    # for i in range(0, verts.size // 3):
+    #     for j in range(0, 3):
+    #         ndex[j] = int(verts[i][j])
+    #         frac[j] = verts[i][j] % 1
+    #     # not index trickiness below (with 0,1,2 reversed on right-hand side)
+    #     verts2[i][0] = xvals[ndex[2]] + (dx) * frac[2]
+    #     verts2[i][1] = yvals[ndex[1]] + (dy) * frac[1]
+    #     verts2[i][2] = zvals[ndex[0]] + (dz) * frac[0]
 
     # mesh = Poly3DCollection(verts[faces], linewidths=0.1, alpha=0.85)
     # mesh.set_edgecolor([0, 0, 1])
@@ -259,10 +260,10 @@ def main():
     # ax.set_zlim(min(zvals), max(zvals))
     # plt.show()
 
-    filename = 'ljlshit'
-    if filename != '':
-        print('Object exported to ' + filename + '.ply')
-        exportPLY(filename, verts2, faces)
+    # filename = 'ljlshit'
+    # if filename != '':
+    #     print('Object exported to ' + filename + '.ply')
+    #     exportPLY(filename, verts2, faces)
     #
     #
     # # Create a 3D figure
