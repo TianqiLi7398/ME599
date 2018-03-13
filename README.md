@@ -18,8 +18,8 @@ Functions are as follow:
 (1) f1(x,y) = x^2 + y^2 / 0.25 - 1  
 (2) f2(x,y) = x^2 / 0.25 + y^2 / 1 - 1
 
-<img src="ellipse_x.jpg" width="230">
-<img src="ellipse_y.jpg" width="230">
+<img src="/pics/ellipse_x.jpg" width="230">
+<img src="/pics/ellipse_y.jpg" width="230">
 
 ### 2. 3D morphing
 > It's like a process of creating a 4D object since we created a sequence of 3D object morph (but impossible to display 4D outcome in a 3D world)  
@@ -32,8 +32,8 @@ Functions are as follow:
 (1) f1(x,y,z) = x^10 + y^10 + z^10 -1 (left)
 (2) f2(x,y,z) = z^2 / 0.5^2 + x^2 + y^2 / 0.5^2 - 1 (right)
 
-<img src="cube.jpg" width="230">
-<img src="ellipsoid.jpg" width="230">
+<img src="/pics/cube.jpg" width="230">
+<img src="/pics/ellipsoid.jpg" width="230">
 
 ### 3. Speed up with parallel computing
 > Huge improvement from serial to parallel (> 300 times faster)  
