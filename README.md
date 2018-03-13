@@ -54,6 +54,11 @@ Functions are as follow:
 2. For each point(x, y, z) in a small grid in the thread, we put the result of fk' = f1(x, y, z) × (1 - tk) + f2(x, y, z) × tk in a 4D grid F(x, y, z, tk).
 
 ##### Result
+>Hardware:  
+>CPU: Intel Core i7-4700 HQ @ 2.6 GHz  
+>GPU: GeForce GTX 970M with 1280 CUDA cores.  
+>The clock rates specified by Nvidia are 924 MHz (+ Boost) for the GPU and 1250 MHz (5000 MHz effective) for the up to 6 GB of GDDR5 memory.  
+
 >Huge speedup is observed in 2D morphing.(graph below)  
 >Because of the high density of the grid points, we just run a couple times and speed-up in 3D is approximately over 300 times (serial is 386s and parallel is 1s)
 
