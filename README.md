@@ -18,11 +18,11 @@ Functions are as follow:
 (1) f1(x,y) = x^2 + y^2 / 0.25 - 1  
 (2) f2(x,y) = x^2 / 0.25 + y^2 / 1 - 1
 
-<img src="pics/ellipse_x.jpg" width="300">
+<img style="float: right;" src="pics/ellipse_x.jpg" width="300">
 
-<img src="pics/ellipse_y.jpg" width="300">
+<img style="float: right;" src="pics/ellipse_y.jpg" width="300">
 
-<img src="pics/2Dmorph.jpg" width="300">
+<img style="float: right;" src="pics/2Dmorph.jpg" width="300">
 
 ### 2. 3D morphing
 > It's like a process of creating a 4D object since we created a sequence of 3D object morph (but impossible to display 4D outcome in a 3D world)  
@@ -35,9 +35,9 @@ Functions are as follow:
 (1) f1(x,y,z) = x^10 + y^10 + z^10 -1 (left)
 (2) f2(x,y,z) = z^2 / 0.5^2 + x^2 + y^2 / 0.5^2 - 1 (right)
 
-<img src="pics/cube.jpg" width="300">  
-<img src="pics/ellipsoid.jpg" width="300">  
-<img src="pics/3Dmorph.jpg" width="300">
+<img style="float: right;" src="pics/cube.jpg" width="300">  
+<img style="float: right;" src="pics/ellipsoid.jpg" width="300">  
+<img style="float: right;" src="pics/3Dmorph.jpg" width="300">  
 
 ### 3. Speed up with parallel computing
 > Huge improvement from serial to parallel (> 300 times faster)  
@@ -57,7 +57,7 @@ Functions are as follow:
 >Huge speedup is observed in 2D morphing.(graph below)  
 >Because of the high density of the grid points, we just run a couple times and speed-up in 3D is approximately over 300 times (serial is 386s and parallel is 1s)
 
-<img src="pics/speedupnew.jpg" width="300">
+<img style="float: right;" src="pics/speedupnew.jpg" width="300">
 
 ### 4. Polygon mesh and output
 > The object should be agreed with the type that Hololens supports.
