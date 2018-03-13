@@ -76,7 +76,7 @@ Import these PLY files into Blender. XXXXX
 
 > Add detectable gesture and the ability of scaling, rotating and placing the object.
 
-##### Import the fbx files into Unity and place them accordingly. Then we add gesture and manipulation properties to those objects so that they can be scaled, moved, rotated in AR environment. We coded the interactive properties via C# in Visual Studio. Configure deployment settings correctly and then build the VS solution.
+##### Import the fbx files into Unity and place them accordingly. Then we add gesture and manipulation properties to those objects so that they can be scaled, self-rotated, rotated in AR environment. We coded the interactive properties via C# in Visual Studio. Configure deployment settings correctly and then build the VS solution.
 
 ### 6. Deploy to Hololen glasses
 
